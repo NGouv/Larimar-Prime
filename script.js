@@ -25,42 +25,94 @@ function setupMobileMenu() {
   mobileQuery.addEventListener("change", () => setOpen(false));
 }
 
-function setupHeroVideo() {
-  const video = document.querySelector(".hero-video");
-  if (!video) return;
+function setupSantosSlideshow() {
+  const section = document.querySelector(".santos-section");
+  if (!section) return;
 
-  const mobileQuery = window.matchMedia("(max-width: 640px)");
+  const slides = Array.from(section.querySelectorAll(".santos-slide"));
+  const indicators = Array.from(section.querySelectorAll("[data-santos-slide-to]"));
+  if (slides.length < 2 || slides.length !== indicators.length) return;
+
   const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-  let activeSource = "";
+  let activeIndex = 0;
+  let changeId = 0;
+  let timer;
+  let paused = false;
 
-  const updateVideoSource = () => {
-    if (reducedMotionQuery.matches) {
-      activeSource = "";
-      video.pause();
-      video.removeAttribute("src");
-      video.load();
-      video.classList.remove("is-ready");
+  const loadSlide = (index) => {
+    const slide = slides[index];
+    const source = slide.dataset.src;
+    if (!source || (slide.complete && slide.naturalWidth > 0)) return Promise.resolve();
+
+    return new Promise((resolve, reject) => {
+      slide.addEventListener("load", resolve, { once: true });
+      slide.addEventListener("error", reject, { once: true });
+      slide.src = source;
+    });
+  };
+
+  const showSlide = async (index) => {
+    const requestId = ++changeId;
+    try {
+      await loadSlide(index);
+    } catch (error) {
+      console.error(`Não foi possível carregar a paisagem ${index + 1}.`, error);
       return;
     }
 
-    const source = mobileQuery.matches ? "assets/hero-mobile.mp4" : "assets/hero-pc.mp4";
-    if (source === activeSource) return;
-
-    activeSource = source;
-    video.classList.remove("is-ready");
-    video.pause();
-    video.removeAttribute("src");
-    video.load();
-    video.src = source;
-    video.load();
+    if (requestId !== changeId) return;
+    activeIndex = index;
+    slides.forEach((slide, slideIndex) => {
+      slide.classList.toggle("is-active", slideIndex === index);
+    });
+    indicators.forEach((indicator, slideIndex) => {
+      indicator.setAttribute("aria-pressed", String(slideIndex === index));
+    });
   };
 
-  video.addEventListener("loadeddata", () => video.classList.add("is-ready"));
-  video.addEventListener("error", () => video.classList.remove("is-ready"));
-  mobileQuery.addEventListener("change", updateVideoSource);
-  reducedMotionQuery.addEventListener("change", updateVideoSource);
-  updateVideoSource();
+  const stop = () => {
+    window.clearTimeout(timer);
+    timer = undefined;
+  };
+
+  const schedule = () => {
+    stop();
+    if (paused || reducedMotionQuery.matches) return;
+    timer = window.setTimeout(async () => {
+      await showSlide((activeIndex + 1) % slides.length);
+      schedule();
+    }, 6500);
+  };
+
+  indicators.forEach((indicator, index) => {
+    indicator.addEventListener("click", async () => {
+      stop();
+      await showSlide(index);
+      schedule();
+    });
+  });
+
+  section.addEventListener("mouseenter", () => {
+    paused = true;
+    stop();
+  });
+  section.addEventListener("mouseleave", () => {
+    paused = false;
+    schedule();
+  });
+  section.addEventListener("focusin", () => {
+    paused = true;
+    stop();
+  });
+  section.addEventListener("focusout", (event) => {
+    if (!section.contains(event.relatedTarget)) {
+      paused = false;
+      schedule();
+    }
+  });
+  reducedMotionQuery.addEventListener("change", schedule);
+  schedule();
 }
 
 setupMobileMenu();
-setupHeroVideo();
+setupSantosSlideshow();

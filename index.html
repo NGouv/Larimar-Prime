@@ -35,7 +35,6 @@
 
   <main>
     <section class="hero" aria-labelledby="hero-title">
-      <video class="hero-video" autoplay muted loop playsinline preload="metadata" aria-hidden="true"></video>
       <div class="hero-shade"></div>
       <div class="hero-content">
         <p class="eyebrow hero-reveal">Larimar Prime Imóveis <span aria-hidden="true">·</span> Santos, SP</p>
@@ -113,7 +112,11 @@
 
     <section class="santos-section" id="santos" aria-labelledby="santos-title">
       <div class="santos-image-wrap">
-        <img src="assets/paisagem.jpg" alt="Vista noturna do Emissário de Santos, com a escultura vermelha diante do mar" width="1080" height="1440" loading="lazy">
+        <img class="santos-slide is-active" src="assets/paisagem2.png" alt="" aria-hidden="true" width="1600" height="900" fetchpriority="high">
+        <img class="santos-slide" data-src="assets/paisagem3.png" alt="" aria-hidden="true" width="1600" height="900">
+        <img class="santos-slide" data-src="assets/paisagem4.png" alt="" aria-hidden="true" width="1600" height="900">
+        <img class="santos-slide" data-src="assets/paisagem5.png" alt="" aria-hidden="true" width="1600" height="900">
+        <div class="santos-shade"></div>
         <span class="image-caption">Santos, SP</span>
       </div>
       <div class="santos-copy">
@@ -121,6 +124,12 @@
         <h2 id="santos-title">A vida encontra seu ritmo à beira-mar.</h2>
         <p>Uma cidade de encontros entre mar, arquitetura e vida cotidiana. Encontre um espaço que acompanhe o seu próximo capítulo em Santos.</p>
         <span class="fine-rule" aria-hidden="true"></span>
+      </div>
+      <div class="santos-indicators" role="group" aria-label="Escolher paisagem">
+        <button class="santos-indicator" type="button" aria-label="Mostrar paisagem 1" aria-pressed="true" data-santos-slide-to="0"></button>
+        <button class="santos-indicator" type="button" aria-label="Mostrar paisagem 2" aria-pressed="false" data-santos-slide-to="1"></button>
+        <button class="santos-indicator" type="button" aria-label="Mostrar paisagem 3" aria-pressed="false" data-santos-slide-to="2"></button>
+        <button class="santos-indicator" type="button" aria-label="Mostrar paisagem 4" aria-pressed="false" data-santos-slide-to="3"></button>
       </div>
     </section>
 

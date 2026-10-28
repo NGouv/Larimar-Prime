@@ -152,29 +152,17 @@ button:focus-visible {
   min-height: clamp(520px, 80svh, 760px);
   align-items: flex-end;
   overflow: hidden;
-  background: var(--navy);
+  background: var(--navy) url("assets/hero-foto.png") center 52% / cover no-repeat;
   color: var(--pearl);
   isolation: isolate;
 }
 
-.hero-video,
 .hero-shade {
   position: absolute;
   z-index: -1;
   inset: 0;
   width: 100%;
   height: 100%;
-}
-
-.hero-video {
-  object-fit: cover;
-  object-position: center;
-  opacity: 0;
-  transition: opacity 400ms ease;
-}
-
-.hero-video.is-ready {
-  opacity: 1;
 }
 
 .hero-shade {
@@ -624,33 +612,54 @@ button:focus-visible {
 }
 
 .santos-section {
-  display: grid;
-  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
-  min-height: 360px;
-  background: #efede7;
+  position: relative;
+  display: flex;
+  min-height: clamp(520px, 72svh, 760px);
+  align-items: center;
+  overflow: hidden;
+  background: var(--navy);
+  color: var(--pearl);
+  isolation: isolate;
 }
 
 .santos-image-wrap {
-  position: relative;
-  min-height: 360px;
-  overflow: hidden;
+  position: absolute;
+  z-index: -1;
+  inset: 0;
 }
 
-.santos-image-wrap img {
+.santos-slide {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
-  min-height: 360px;
   object-fit: cover;
-  object-position: center 67%;
+  object-position: center 62%;
+  opacity: 0;
+  transition: opacity 1000ms ease;
+}
+
+.santos-slide.is-active {
+  opacity: 1;
+}
+
+.santos-shade {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background: linear-gradient(90deg, rgb(7 22 41 / 78%) 0%, rgb(7 22 41 / 55%) 48%, rgb(7 22 41 / 24%) 100%),
+    linear-gradient(0deg, rgb(7 22 41 / 52%) 0%, transparent 62%);
 }
 
 .image-caption {
   position: absolute;
-  right: 18px;
-  bottom: 18px;
+  z-index: 2;
+  left: clamp(24px, 9vw, 132px);
+  bottom: 24px;
   padding: 7px 10px;
-  background: var(--navy);
+  background: rgb(7 22 41 / 76%);
   color: var(--pearl);
   font-size: 9px;
   letter-spacing: 0.1em;
@@ -658,22 +667,32 @@ button:focus-visible {
 }
 
 .santos-copy {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  padding: clamp(36px, 7vw, 100px);
+  width: min(100% - 2 * clamp(24px, 9vw, 132px), 1260px);
+  margin: 0 auto;
+  padding: clamp(80px, 11vh, 120px) 0 clamp(110px, 13vh, 145px);
+}
+
+.santos-copy .eyebrow-dark {
+  color: var(--gold);
 }
 
 .santos-copy h2 {
   max-width: 520px;
+  margin: 14px 0 0;
+  color: var(--pearl);
   font-size: clamp(38px, 4.7vw, 60px);
 }
 
 .santos-copy > p:not(.eyebrow) {
   max-width: 490px;
   margin: 18px 0 0;
-  color: var(--muted);
+  color: #e3e5e6;
   font-size: 13px;
   line-height: 1.85;
 }
@@ -683,6 +702,47 @@ button:focus-visible {
   height: 1px;
   margin-top: 26px;
   background: var(--gold);
+}
+
+.santos-indicators {
+  position: absolute;
+  z-index: 2;
+  right: clamp(24px, 9vw, 132px);
+  bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.santos-indicator {
+  display: inline-flex;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.santos-indicator::before {
+  width: 7px;
+  height: 7px;
+  border-radius: 4px;
+  background: rgb(247 245 240 / 65%);
+  content: "";
+  transition: width 180ms ease, background-color 180ms ease;
+}
+
+.santos-indicator[aria-pressed="true"]::before {
+  width: 22px;
+  background: var(--gold);
+}
+
+.santos-indicator:focus-visible {
+  outline: 1px solid var(--pearl);
+  outline-offset: -5px;
 }
 
 .contact-band {
@@ -1060,20 +1120,6 @@ button:focus-visible {
     align-items: flex-end;
   }
 
-  .santos-section {
-    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-  }
-
-  .santos-image-wrap,
-  .santos-image-wrap img {
-    height: 400px;
-    min-height: 0;
-  }
-
-  .santos-copy {
-    padding: 35px;
-  }
-
   .site-footer {
     padding: 28px 22px;
   }
@@ -1153,6 +1199,7 @@ button:focus-visible {
 
   .hero {
     min-height: clamp(520px, 80svh, 700px);
+    background-position: 54% center;
   }
 
   .hero-shade {
@@ -1206,23 +1253,23 @@ button:focus-visible {
     flex-basis: clamp(220px, calc(100vw - 100px), 350px);
   }
 
-  .santos-section {
-    grid-template-columns: 1fr;
-  }
-
-  .santos-image-wrap,
   .santos-image-wrap img {
-    height: clamp(280px, 82vw, 360px);
-    min-height: 0;
-    max-height: none;
-  }
-
-  .santos-image-wrap img {
-    object-position: center 62%;
+    object-position: center 58%;
   }
 
   .santos-copy {
-    padding: 42px 25px 48px;
+    width: calc(100% - 44px);
+    padding: 90px 0 112px;
+  }
+
+  .santos-indicators {
+    right: 14px;
+    bottom: 14px;
+  }
+
+  .image-caption {
+    left: 22px;
+    bottom: 24px;
   }
 
   .contact-band h2 {
