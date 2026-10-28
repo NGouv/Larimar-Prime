@@ -223,46 +223,81 @@ async function openEditProperty(property) {
   }
 }
 
-function nullableNumber(value) {
-  if (value === "") return null;
-  const number = Number(value);
-  return Number.isFinite(number) ? number : null;
+function formText(data, name, label, required = false) {
+  const value = data.get(name);
+  if (value === null) {
+    if (required) throw new Error(`O campo obrigatório "${label}" não foi enviado. Confira o formulário e tente novamente.`);
+    return "";
+  }
+  if (typeof value !== "string") {
+    throw new Error(`O valor do campo "${label}" é inválido.`);
+  }
+  return value.trim();
 }
 
-function makePropertyPayload(id, uploadedImages) {
-  const data = new FormData(propertyForm);
+function nullableNumber(value, label) {
+  if (value === null || value === undefined) return null;
+  if (typeof value !== "string") {
+    throw new Error(`O valor do campo "${label}" é inválido.`);
+  }
+  const normalized = value.trim();
+  if (!normalized) return null;
+
+  const number = Number(normalized);
+  if (!Number.isFinite(number) || number < 0) {
+    throw new Error(`Informe um número válido e não negativo para "${label}".`);
+  }
+  return number;
+}
+
+function makePropertyPayload(id, uploadedImages, data) {
+  const title = formText(data, "title", "Título do anúncio", true);
   const selectedImages = allImages();
   const gallery = selectedImages.map((image) => {
     const path = image.path || uploadedImages.get(image.key);
+    if (typeof path !== "string" || !path) {
+      throw new Error(`Não foi possível identificar a foto "${image.file?.name || image.alt || "selecionada"}". Tente selecioná-la novamente.`);
+    }
     return {
       path,
-      alt: image.alt || `Foto de ${data.get("title").trim()}`
+      alt: image.alt || `Foto de ${title}`
     };
   });
   const selectedCover = selectedImages.find((image) => image.key === coverKey);
+  const status = formText(data, "status", "Status do anúncio", true);
 
-  if (data.get("status") === "published" && (!gallery.length || !selectedCover)) {
+  if (status === "published" && (!gallery.length || !selectedCover)) {
     throw new Error("Inclua ao menos uma foto e escolha a imagem de capa para publicar o anúncio.");
+  }
+
+  const coverImagePath = selectedCover
+    ? selectedCover.path || uploadedImages.get(selectedCover.key)
+    : null;
+  if (selectedCover && (typeof coverImagePath !== "string" || !coverImagePath)) {
+    throw new Error("Não foi possível identificar a foto de capa. Selecione-a novamente.");
   }
 
   return {
     id,
-    title: data.get("title").trim(),
-    property_type: data.get("property_type"),
-    purpose: data.get("purpose"),
-    neighborhood: data.get("neighborhood").trim(),
-    city: data.get("city").trim(),
-    state: data.get("state").trim().toUpperCase(),
-    price: nullableNumber(data.get("price")),
-    bedrooms: nullableNumber(data.get("bedrooms")),
-    bathrooms: nullableNumber(data.get("bathrooms")),
-    parking_spaces: nullableNumber(data.get("parking_spaces")),
-    area_sqm: nullableNumber(data.get("area_sqm")),
-    description: data.get("description").trim(),
-    features: data.get("features").split(/\r?\n/).map((value) => value.trim()).filter(Boolean),
+    title,
+    property_type: formText(data, "property_type", "Tipo de imóvel", true),
+    purpose: formText(data, "purpose", "Finalidade", true),
+    neighborhood: formText(data, "neighborhood", "Região ou bairro", true),
+    city: formText(data, "city", "Cidade", true),
+    state: formText(data, "state", "Estado", true).toUpperCase(),
+    price: nullableNumber(data.get("price"), "Preço"),
+    bedrooms: nullableNumber(data.get("bedrooms"), "Quartos"),
+    bathrooms: nullableNumber(data.get("bathrooms"), "Banheiros"),
+    parking_spaces: nullableNumber(data.get("parking_spaces"), "Vagas de garagem"),
+    area_sqm: nullableNumber(data.get("area_sqm"), "Área"),
+    description: formText(data, "description", "Descrição", true),
+    features: formText(data, "features", "Características adicionais")
+      .split(/\r?\n/)
+      .map((value) => value.trim())
+      .filter(Boolean),
     gallery,
-    cover_image_path: selectedCover ? selectedCover.path || uploadedImages.get(selectedCover.key) : null,
-    status: data.get("status")
+    cover_image_path: coverImagePath,
+    status
   };
 }
 
@@ -325,7 +360,7 @@ async function saveProperty(event) {
   try {
     const uploadResult = await uploadPendingImages(propertyId);
     uploadedPaths = uploadResult.uploadedPaths;
-    const payload = makePropertyPayload(propertyId, uploadResult.uploadedImages);
+    const payload = makePropertyPayload(propertyId, uploadResult.uploadedImages, formData);
     const result = currentPropertyId
       ? await supabase.from("properties").update(payload).eq("id", propertyId).select("id").single()
       : await supabase.from("properties").insert(payload).select("id").single();
