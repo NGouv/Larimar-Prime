@@ -10,6 +10,7 @@ As permissões de leitura e escrita são aplicadas no PostgreSQL e no Storage po
 
 1. Crie ou selecione o projeto Supabase e confirme que ele não contém tabelas ou políticas com estes nomes antes de executar a configuração.
 2. No SQL Editor do Supabase, execute `supabase/schema.sql`. O script cria `admin_users`, `properties`, índices, trigger, políticas RLS e o bucket privado `property-images`. Ele não apaga imóveis nem objetos existentes. Se já existir um bucket com esse identificador, o script não altera suas configurações: confirme que ele continua privado e aceita apenas JPEG, PNG e WebP de até 10 MB.
+   - Se a política anterior `Visitors can read published property images` já tiver sido aplicada, execute `supabase/migrations/20261028_restrict_published_property_image_reads.sql` no SQL Editor para substituí-la pela regra que só permite ler arquivos listados na galeria de imóveis publicados.
 3. Em Authentication → URL Configuration, defina a URL do site publicado e adicione `https://SEU-DOMINIO/admin.html` à lista de redirecionamentos permitidos. Isso também habilita o link de recuperação de senha.
 4. Desative o cadastro público de usuários em Authentication → Sign In / Providers → Email. O painel não possui tela de cadastro.
 5. Convide ou crie o primeiro usuário proprietário em Authentication → Users. Depois de criado, autorize-o no SQL Editor, substituindo o e-mail pelo endereço real da conta:

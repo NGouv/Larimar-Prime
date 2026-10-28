@@ -153,9 +153,12 @@ create policy "Visitors can read published property images"
     bucket_id = 'property-images'
     and exists (
       select 1
-      from public.properties
-      where properties.id::text = split_part(storage.objects.name, '/', 1)
-        and properties.status = 'published'
+      from public.properties as property
+      where property.id::text = split_part(storage.objects.name, '/', 1)
+        and property.status = 'published'
+        and property.gallery @> jsonb_build_array(
+          jsonb_build_object('path', storage.objects.name)
+        )
     )
   );
 
