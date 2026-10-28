@@ -3,15 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Conheça os detalhes deste imóvel ilustrativo em Santos.">
+  <meta name="description" content="Confira os detalhes dos imóveis publicados pela Larimar Prime em Santos.">
   <meta name="theme-color" content="#071629">
-  <title>Imóvel ilustrativo | Larimar Prime Imóveis</title>
+  <title>Imóvel | Larimar Prime Imóveis</title>
   <link rel="icon" type="image/png" href="assets/Logo%20luxuoso%20Larimar%20Prime%20Im%C3%B3veis.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script src="script.js" defer></script>
+  <script type="module" src="public-properties.js"></script>
 </head>
 <body data-page="property">
   <header class="site-header">
@@ -37,8 +38,9 @@
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m7 7-7-7 7-7"></path></svg>
       Voltar ao catálogo
     </a>
-    <div class="detail-gallery" data-detail-gallery aria-label="Galeria do imóvel"></div>
-    <div class="detail-content">
+    <p class="property-state" data-property-state role="status" aria-live="polite">Carregando anúncio...</p>
+    <div class="detail-gallery" data-detail-gallery aria-label="Galeria do imóvel" hidden></div>
+    <div class="detail-content" hidden>
       <div class="detail-heading">
         <div>
           <p class="eyebrow eyebrow-dark" data-detail-type></p>
@@ -47,7 +49,6 @@
         </div>
         <p class="detail-price" data-detail-price></p>
       </div>
-      <p class="illustrative-note">Exemplo ilustrativo</p>
       <dl class="property-facts" data-detail-facts></dl>
       <div class="detail-lower">
         <div>
@@ -57,7 +58,7 @@
           <ul class="feature-list" data-detail-features></ul>
         </div>
         <aside class="detail-contact">
-          <p>Imóvel apresentado como exemplo ilustrativo.</p>
+          <p>Fale com nossa equipe sobre este imóvel.</p>
           <a class="button button-gold" data-detail-whatsapp href="https://wa.me/5511947216091" target="_blank" rel="noopener">Tenho interesse</a>
         </aside>
       </div>

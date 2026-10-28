@@ -12,6 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script src="script.js" defer></script>
+  <script type="module" src="public-properties.js"></script>
 </head>
 <body data-page="home">
   <header class="site-header">
@@ -42,7 +43,50 @@
         <p class="hero-description hero-reveal">Compra, venda e locação de imóveis em Santos, com atendimento personalizado.</p>
         <div class="hero-actions hero-reveal">
           <a class="button button-gold" href="#imoveis">Explorar imóveis</a>
-          <a class="button button-outline" href="https://wa.me/5511947216091" target="_blank" rel="noopener">Fale conosco</a>
+          <a class="button button-gold" href="https://wa.me/5511947216091" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.2 11.7a8.2 8.2 0 0 1-12.1 7.2L3.5 20l1.2-4.4a8.2 8.2 0 1 1 15.5-3.9Z"></path><path d="M8.5 8.1c.2-.5.4-.5.7-.5h.5c.2 0 .4.1.5.4l.7 1.7c.1.2.1.4 0 .6l-.5.6c-.2.2-.2.4 0 .6.5.9 1.2 1.6 2.1 2.1.2.1.4.1.6-.1l.7-.8c.2-.2.4-.2.6-.1l1.6.8c.2.1.4.3.4.5 0 .3-.2 1.2-.8 1.6-.5.4-1.1.6-1.8.4-1-.2-2.2-.8-3.6-2-1.2-1-2-2.3-2.3-3.3-.3-.8 0-1.7.6-2.5Z"></path></svg>
+            <span>Fale conosco</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="partners-section" aria-labelledby="partners-title">
+      <div class="section-shell">
+        <div class="partners-intro">
+          <p class="eyebrow eyebrow-dark">Larimar Prime Imóveis</p>
+          <h2 id="partners-title">Quem está à frente da Larimar</h2>
+          <p>Atendimento personalizado e exclusivo para acompanhar você em cada etapa da sua jornada imobiliária.</p>
+        </div>
+        <div class="partners-grid">
+          <figure class="partner-card">
+            <img
+              class="partner-image"
+              src="assets/Socio.png"
+              alt="Arte vertical com retrato de Marcos Freire Souto, identificado como sócio da Larimar Prime Imóveis."
+              width="941"
+              height="1672"
+              loading="lazy"
+              decoding="async">
+            <figcaption class="partner-caption">
+              <span class="partner-name">Marcos Freire Souto</span>
+              <span class="partner-role">Sócio · Larimar Prime Imóveis</span>
+            </figcaption>
+          </figure>
+          <figure class="partner-card">
+            <img
+              class="partner-image"
+              src="assets/Socia.png"
+              alt="Arte vertical com retrato de Larissa Peres, identificada como sócia da Larimar Prime Imóveis."
+              width="941"
+              height="1672"
+              loading="lazy"
+              decoding="async">
+            <figcaption class="partner-caption">
+              <span class="partner-name">Larissa Peres</span>
+              <span class="partner-role">Sócia · Larimar Prime Imóveis</span>
+            </figcaption>
+          </figure>
         </div>
       </div>
     </section>
@@ -62,7 +106,9 @@
           </button>
         </div>
       </div>
-      <div class="property-track" data-property-track aria-label="Imóveis ilustrativos"></div>
+      <div class="property-track" data-property-track aria-label="Imóveis publicados">
+        <p class="catalog-status" data-catalog-status role="status" aria-live="polite">Carregando imóveis...</p>
+      </div>
     </section>
 
     <section class="santos-section" id="santos" aria-labelledby="santos-title">

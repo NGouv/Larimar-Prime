@@ -249,6 +249,17 @@ button:focus-visible {
   transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
 }
 
+.hero-actions .button svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.5;
+}
+
 .button-gold {
   background: var(--gold);
   color: var(--navy);
@@ -303,6 +314,83 @@ button:focus-visible {
 .catalog {
   padding-top: clamp(72px, 9vw, 116px);
   padding-bottom: clamp(78px, 10vw, 132px);
+}
+
+.partners-section {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: clamp(64px, 8vw, 104px) 0;
+  background: var(--pearl);
+}
+
+.partners-intro {
+  max-width: 720px;
+  margin: 0 auto 38px;
+  text-align: center;
+}
+
+.partners-intro h2 {
+  margin: 9px 0 12px;
+  color: var(--navy);
+  font-family: var(--serif);
+  font-size: clamp(38px, 5vw, 58px);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1;
+}
+
+.partners-intro > p:last-child {
+  max-width: 560px;
+  margin: 0 auto;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.partners-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 390px));
+  justify-content: center;
+  gap: clamp(20px, 4vw, 48px);
+}
+
+.partner-card {
+  min-width: 0;
+  margin: 0;
+}
+
+.partner-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 941 / 1672;
+  border: 1px solid var(--line);
+  background: #e7e4dc;
+  object-fit: contain;
+}
+
+.partner-caption {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-bottom: 1px solid var(--line);
+  padding: 14px 2px 12px;
+}
+
+.partner-name {
+  color: var(--navy);
+  font-family: var(--serif);
+  font-size: 27px;
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.partner-role {
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  line-height: 1.6;
+  text-transform: uppercase;
 }
 
 .section-heading {
@@ -385,6 +473,28 @@ button:focus-visible {
   -webkit-overflow-scrolling: touch;
 }
 
+.catalog-status {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.catalog-retry {
+  min-height: 44px;
+  border: 1px solid var(--navy);
+  padding: 0 15px;
+  background: transparent;
+  color: var(--navy);
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+}
+
+.catalog-retry:hover {
+  border-color: var(--gold);
+}
+
 .property-card {
   position: relative;
   aspect-ratio: 1;
@@ -449,14 +559,22 @@ button:focus-visible {
   white-space: nowrap;
 }
 
-.illustrative-note {
-  display: table;
+.property-title {
+  display: -webkit-box;
+  overflow: hidden;
   margin: 3px 0 0;
-  border: 1px solid #d9d2c4;
-  padding: 2px 5px;
-  color: #75684e;
-  font-size: 8px;
-  letter-spacing: 0.035em;
+  color: var(--navy);
+  font-family: var(--serif);
+  font-size: 19px;
+  font-weight: 500;
+  line-height: 1.05;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.property-card-body > .property-region {
+  margin: 3px 0 0;
+  text-align: left;
 }
 
 .property-price {
@@ -697,6 +815,13 @@ button:focus-visible {
   width: min(100% - 2 * clamp(22px, 6vw, 88px), 1120px);
   margin: 0 auto;
   padding: 35px 0 clamp(72px, 9vw, 112px);
+}
+
+.property-state {
+  margin: 20px 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.8;
 }
 
 .back-link {
@@ -1050,6 +1175,19 @@ button:focus-visible {
   .section-heading h2 {
     max-width: 420px;
     font-size: clamp(35px, 9vw, 48px);
+  }
+
+  .partners-grid {
+    grid-template-columns: minmax(0, 390px);
+  }
+
+  .partners-intro {
+    margin-bottom: 30px;
+    text-align: left;
+  }
+
+  .partners-intro > p:last-child {
+    margin-left: 0;
   }
 
   .carousel-controls {

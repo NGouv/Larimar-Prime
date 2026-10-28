@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#071629">
+  <meta name="description" content="Painel administrativo da Larimar Prime Imóveis.">
+  <title>Painel administrativo | Larimar Prime Imóveis</title>
+  <link rel="icon" type="image/png" href="assets/Logo%20luxuoso%20Larimar%20Prime%20Im%C3%B3veis.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="admin.css">
+  <script type="module" src="admin.js"></script>
+</head>
+<body class="admin-page">
+  <header class="site-header admin-header">
+    <a class="brand-lockup" href="index.html" aria-label="Larimar Prime Imóveis — página inicial">
+      <img src="assets/Logo luxuoso Larimar Prime Imóveis.png" alt="" width="58" height="58">
+      <span class="wordmark"><span>Larimar Prime</span><small>Administração</small></span>
+    </a>
+    <a class="admin-back-link" href="index.html">Voltar ao site</a>
+  </header>
+
+  <main class="admin-main">
+    <p class="admin-status" data-admin-status role="status" aria-live="polite">Verificando acesso...</p>
+
+    <section class="admin-login" data-login-panel hidden aria-labelledby="login-title">
+      <p class="eyebrow eyebrow-dark">Acesso restrito</p>
+      <h1 id="login-title">Painel administrativo</h1>
+      <p class="admin-intro">Entre com a conta autorizada para administrar os imóveis da Larimar Prime.</p>
+      <form data-login-form>
+        <label for="login-email">E-mail</label>
+        <input id="login-email" name="email" type="email" autocomplete="username" required>
+        <label for="login-password">Senha</label>
+        <input id="login-password" name="password" type="password" autocomplete="current-password" required>
+        <button class="button button-gold" type="submit">Entrar</button>
+        <button class="admin-text-button" type="button" data-recovery-button>Recuperar senha</button>
+      </form>
+    </section>
+
+    <section class="admin-login" data-password-reset-panel hidden aria-labelledby="password-reset-title">
+      <p class="eyebrow eyebrow-dark">Recuperação de acesso</p>
+      <h1 id="password-reset-title">Defina uma nova senha</h1>
+      <form data-password-reset-form>
+        <label for="reset-password">Nova senha</label>
+        <input id="reset-password" name="password" type="password" autocomplete="new-password" minlength="8" required>
+        <label for="reset-password-confirmation">Confirme a nova senha</label>
+        <input id="reset-password-confirmation" name="password_confirmation" type="password" autocomplete="new-password" minlength="8" required>
+        <button class="button button-gold" type="submit">Atualizar senha</button>
+      </form>
+    </section>
+
+    <section class="admin-dashboard" data-dashboard hidden aria-labelledby="dashboard-title">
+      <div class="admin-heading">
+        <div>
+          <p class="eyebrow eyebrow-dark">Gestão de conteúdo</p>
+          <h1 id="dashboard-title">Imóveis</h1>
+        </div>
+        <button class="button button-outline admin-logout" type="button" data-logout>Encerrar sessão</button>
+      </div>
+
+      <div class="admin-metrics" aria-label="Resumo dos anúncios">
+        <article class="admin-metric"><span>Total</span><strong data-total-count>0</strong></article>
+        <article class="admin-metric"><span>Publicados</span><strong data-published-count>0</strong></article>
+        <article class="admin-metric"><span>Rascunhos</span><strong data-draft-count>0</strong></article>
+      </div>
+
+      <div class="admin-list-heading">
+        <h2>Anúncios cadastrados</h2>
+        <button class="button button-gold" type="button" data-new-property>Novo imóvel</button>
+      </div>
+      <div class="admin-list" data-property-list aria-live="polite"></div>
+    </section>
+
+    <section class="admin-editor" data-editor hidden aria-labelledby="editor-title">
+      <div class="admin-list-heading">
+        <h2 id="editor-title">Novo imóvel</h2>
+        <button class="admin-text-button" type="button" data-cancel-editor>Voltar à lista</button>
+      </div>
+      <form data-property-form>
+        <div class="admin-form-grid">
+          <div class="admin-field admin-field-wide">
+            <label for="property-title">Título do anúncio <span aria-hidden="true">*</span></label>
+            <input id="property-title" name="title" maxlength="180" required>
+          </div>
+          <div class="admin-field">
+            <label for="property-type">Tipo de imóvel <span aria-hidden="true">*</span></label>
+            <select id="property-type" name="property_type" required>
+              <option value="casa">Casa</option>
+              <option value="apartamento">Apartamento</option>
+              <option value="cobertura">Cobertura</option>
+              <option value="terreno">Terreno</option>
+              <option value="comercial">Imóvel comercial</option>
+              <option value="outro">Outro</option>
+            </select>
+          </div>
+          <div class="admin-field">
+            <label for="property-purpose">Finalidade <span aria-hidden="true">*</span></label>
+            <select id="property-purpose" name="purpose" required>
+              <option value="venda">Venda</option>
+              <option value="locacao">Locação</option>
+              <option value="venda_locacao">Venda e locação</option>
+            </select>
+          </div>
+          <div class="admin-field">
+            <label for="property-neighborhood">Região ou bairro <span aria-hidden="true">*</span></label>
+            <input id="property-neighborhood" name="neighborhood" maxlength="120" required>
+          </div>
+          <div class="admin-field">
+            <label for="property-city">Cidade <span aria-hidden="true">*</span></label>
+            <input id="property-city" name="city" maxlength="100" required>
+          </div>
+          <div class="admin-field">
+            <label for="property-state">Estado (UF) <span aria-hidden="true">*</span></label>
+            <input id="property-state" name="state" maxlength="2" pattern="[A-Za-z]{2}" autocomplete="address-level1" required>
+          </div>
+          <div class="admin-field">
+            <label for="property-price">Preço (R$)</label>
+            <input id="property-price" name="price" type="number" min="0" step="0.01" inputmode="decimal">
+          </div>
+          <div class="admin-field">
+            <label for="property-bedrooms">Quartos</label>
+            <input id="property-bedrooms" name="bedrooms" type="number" min="0" step="1" inputmode="numeric">
+          </div>
+          <div class="admin-field">
+            <label for="property-bathrooms">Banheiros</label>
+            <input id="property-bathrooms" name="bathrooms" type="number" min="0" step="1" inputmode="numeric">
+          </div>
+          <div class="admin-field">
+            <label for="property-parking">Vagas de garagem</label>
+            <input id="property-parking" name="parking_spaces" type="number" min="0" step="1" inputmode="numeric">
+          </div>
+          <div class="admin-field">
+            <label for="property-area">Área (m²)</label>
+            <input id="property-area" name="area_sqm" type="number" min="0" step="0.01" inputmode="decimal">
+          </div>
+          <div class="admin-field admin-field-wide">
+            <label for="property-description">Descrição <span aria-hidden="true">*</span></label>
+            <textarea id="property-description" name="description" rows="5" maxlength="10000" required></textarea>
+          </div>
+          <div class="admin-field admin-field-wide">
+            <label for="property-features">Características adicionais</label>
+            <textarea id="property-features" name="features" rows="3" aria-describedby="features-help"></textarea>
+            <small id="features-help">Informe uma característica por linha.</small>
+          </div>
+          <div class="admin-field">
+            <label for="property-status">Status do anúncio</label>
+            <select id="property-status" name="status">
+              <option value="draft">Rascunho</option>
+              <option value="published">Publicado</option>
+            </select>
+          </div>
+          <div class="admin-field admin-field-wide">
+            <label for="property-images">Galeria de fotos</label>
+            <input id="property-images" name="images" type="file" accept="image/jpeg,image/png,image/webp" multiple aria-describedby="images-help">
+            <small id="images-help">JPG, PNG ou WebP, até 10 MB por imagem. Escolha uma capa abaixo.</small>
+            <div class="admin-image-list" data-image-list aria-label="Fotos selecionadas"></div>
+          </div>
+        </div>
+        <div class="admin-form-actions">
+          <button class="button button-gold" type="submit" data-save-property>Salvar imóvel</button>
+          <button class="button button-outline admin-cancel-button" type="button" data-cancel-editor>Cancelar</button>
+        </div>
+      </form>
+    </section>
+  </main>
+</body>
+</html>
