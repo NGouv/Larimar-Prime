@@ -1,4 +1,4 @@
-import { createImageUrlMap, formatPrice, getSupabase, propertyLocation } from "./supabase-client.js";
+import { createImageUrlMap, formatPrice, getPublicSupabase, propertyLocation } from "./supabase-client.js";
 
 const propertyFields = "id,title,property_type,purpose,neighborhood,city,state,price,bedrooms,bathrooms,parking_spaces,area_sqm,description,features,gallery,cover_image_path,status,published_at,created_at";
 const typeLabels = {
@@ -146,7 +146,7 @@ async function loadCatalog() {
 
   setCatalogStatus("Carregando imóveis...", false);
   try {
-    const supabase = await getSupabase();
+    const supabase = await getPublicSupabase();
     const { data: properties, error } = await supabase
       .from("properties")
       .select(propertyFields)
@@ -298,7 +298,7 @@ async function loadPropertyDetail() {
   }
 
   try {
-    const supabase = await getSupabase();
+    const supabase = await getPublicSupabase();
     const { data: property, error } = await supabase
       .from("properties")
       .select(propertyFields)

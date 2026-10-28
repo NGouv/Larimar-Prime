@@ -1,39 +1,43 @@
 let clientPromise;
+let publicClientPromise;
 let createClientPromise;
+
+function createSupabaseClient(auth) {
+  return fetch("/api/config")
+    .then(async (response) => {
+      let config;
+      try {
+        config = await response.json();
+      } catch {
+        throw new Error(`A configuração do Supabase não respondeu corretamente (HTTP ${response.status}).`);
+      }
+      if (!response.ok) {
+        throw new Error(config.error || "Não foi possível carregar a configuração do Supabase.");
+      }
+      if (!config.url || !config.anonKey) {
+        throw new Error("A configuração pública do Supabase está incompleta.");
+      }
+      if (!createClientPromise) {
+        createClientPromise = import("https://esm.sh/@supabase/supabase-js@2")
+          .then((module) => module.createClient)
+          .catch(() => {
+            createClientPromise = undefined;
+            throw new Error("Não foi possível carregar o cliente do Supabase. Verifique a conexão e tente novamente.");
+          });
+      }
+      return createClientPromise.then((createClient) =>
+        createClient(config.url, config.anonKey, { auth })
+      );
+    });
+}
 
 export function getSupabase() {
   if (!clientPromise) {
-    clientPromise = fetch("/api/config")
-      .then(async (response) => {
-        let config;
-        try {
-          config = await response.json();
-        } catch {
-          throw new Error(`A configuração do Supabase não respondeu corretamente (HTTP ${response.status}).`);
-        }
-        if (!response.ok) {
-          throw new Error(config.error || "Não foi possível carregar a configuração do Supabase.");
-        }
-        if (!config.url || !config.anonKey) {
-          throw new Error("A configuração pública do Supabase está incompleta.");
-        }
-        if (!createClientPromise) {
-          createClientPromise = import("https://esm.sh/@supabase/supabase-js@2")
-            .then((module) => module.createClient)
-            .catch(() => {
-              createClientPromise = undefined;
-              throw new Error("Não foi possível carregar o cliente do Supabase. Verifique a conexão e tente novamente.");
-            });
-        }
-        const createClient = await createClientPromise;
-        return createClient(config.url, config.anonKey, {
-          auth: {
-            persistSession: true,
-            autoRefreshToken: true,
-            detectSessionInUrl: true
-          }
-        });
-      })
+    clientPromise = createSupabaseClient({
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
+    })
       .catch((error) => {
         clientPromise = undefined;
         throw error;
@@ -41,6 +45,22 @@ export function getSupabase() {
   }
 
   return clientPromise;
+}
+
+export function getPublicSupabase() {
+  if (!publicClientPromise) {
+    publicClientPromise = createSupabaseClient({
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false
+    })
+      .catch((error) => {
+        publicClientPromise = undefined;
+        throw error;
+      });
+  }
+
+  return publicClientPromise;
 }
 
 export async function createImageUrlMap(supabase, paths) {
