@@ -629,7 +629,7 @@ document.querySelector("[data-recovery-button]").addEventListener("click", async
   try {
     supabase ||= await getSupabase();
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/admin.html`
+      redirectTo: `${window.location.origin}/admin`
     });
     if (error) throw new Error(`Não foi possível solicitar a recuperação: ${error.message}`);
     showStatus("Se o e-mail estiver cadastrado, enviaremos as instruções de recuperação.");

@@ -106,7 +106,7 @@ function createPropertyCard(property, imageUrls) {
 
   const link = document.createElement("a");
   link.className = "card-link";
-  link.href = `imovel.html?id=${encodeURIComponent(property.id)}`;
+  link.href = `/imovel?id=${encodeURIComponent(property.id)}`;
   link.textContent = "Ver detalhes";
   body.append(topline, title, purpose, price, meta, link);
   card.append(body);
