@@ -1,6 +1,7 @@
-import { createImageUrlMap, formatPrice, getPublicSupabase, propertyLocation } from "./supabase-client.js";
+import { createImageUrlMap, formatPrice, getPublicSupabase, getVideoEmbedUrl, isMissingVideoColumn, propertyLocation } from "./supabase-client.js";
 
-const propertyFields = "id,title,property_type,purpose,neighborhood,city,state,price,bedrooms,bathrooms,parking_spaces,area_sqm,description,features,gallery,cover_image_path,status,published_at,created_at";
+const propertyFields = "id,title,property_type,purpose,neighborhood,city,state,price,bedrooms,bathrooms,parking_spaces,area_sqm,description,features,gallery,cover_image_path,video_url,status,published_at,created_at";
+const propertyFieldsWithoutVideo = "id,title,property_type,purpose,neighborhood,city,state,price,bedrooms,bathrooms,parking_spaces,area_sqm,description,features,gallery,cover_image_path,status,published_at,created_at";
 const typeLabels = {
   casa: "Casa",
   apartamento: "Apartamento",
@@ -14,6 +15,16 @@ const purposeLabels = {
   locacao: "Para locação",
   venda_locacao: "Venda e locação"
 };
+let videoColumnAvailable = true;
+
+async function selectWithOptionalVideo(query) {
+  let result = await query(propertyFields);
+  if (result.error && isMissingVideoColumn(result.error)) {
+    videoColumnAvailable = false;
+    result = await query(propertyFieldsWithoutVideo);
+  }
+  return result;
+}
 
 function orderedGallery(property) {
   const gallery = Array.isArray(property.gallery) ? [...property.gallery] : [];
@@ -62,6 +73,7 @@ function createPropertyCard(property, imageUrls) {
     image.width = 900;
     image.height = 900;
     image.loading = "lazy";
+    image.decoding = "async";
     const imageWrap = document.createElement("div");
     imageWrap.className = "property-card-gallery";
     imageWrap.append(image);
@@ -147,12 +159,14 @@ async function loadCatalog() {
   setCatalogStatus("Carregando imóveis...", false);
   try {
     const supabase = await getPublicSupabase();
-    const { data: properties, error } = await supabase
-      .from("properties")
-      .select(propertyFields)
-      .eq("status", "published")
-      .order("published_at", { ascending: false, nullsFirst: false })
-      .order("created_at", { ascending: false });
+    const { data: properties, error } = await selectWithOptionalVideo((fields) =>
+      supabase
+        .from("properties")
+        .select(fields)
+        .eq("status", "published")
+        .order("published_at", { ascending: false, nullsFirst: false })
+        .order("created_at", { ascending: false })
+    );
     if (error) throw new Error(error.message);
 
     if (!properties?.length) {
@@ -160,7 +174,9 @@ async function loadCatalog() {
       return;
     }
 
-    const paths = properties.flatMap((property) => orderedGallery(property).map((image) => image.path));
+    const paths = properties
+      .map((property) => orderedGallery(property)[0]?.path)
+      .filter(Boolean);
     const imageUrls = await createImageUrlMap(supabase, paths);
     if (imageUrls.size !== new Set(paths).size) {
       throw new Error("Uma ou mais fotos dos imóveis não estão disponíveis.");
@@ -207,6 +223,7 @@ function renderPropertyDetail(property, imageUrls) {
     image.width = 1200;
     image.height = 1200;
     image.fetchPriority = "high";
+    image.decoding = "async";
     gallery.append(image);
   }
 
@@ -227,12 +244,23 @@ function renderPropertyDetail(property, imageUrls) {
 
   const availableImages = images.filter((item) => imageUrls.has(item.path));
   let currentIndex = 0;
+  let nextImagePreloader;
+  const preloadNextImage = () => {
+    if (availableImages.length < 2) return;
+    const nextIndex = (currentIndex + 1) % availableImages.length;
+    const nextUrl = imageUrls.get(availableImages[nextIndex].path);
+    if (nextImagePreloader?.src === nextUrl) return;
+    nextImagePreloader = new Image();
+    nextImagePreloader.decoding = "async";
+    nextImagePreloader.src = nextUrl;
+  };
   const showImage = (index) => {
     currentIndex = (index + availableImages.length) % availableImages.length;
     const current = availableImages[currentIndex];
     gallery.querySelector(".detail-gallery-image").src = imageUrls.get(current.path);
     gallery.querySelector(".detail-gallery-image").alt = current.alt || `Foto de ${property.title}`;
     counter.textContent = `${currentIndex + 1} / ${availableImages.length}`;
+    preloadNextImage();
   };
 
   if (availableImages.length > 1) {
@@ -244,6 +272,25 @@ function renderPropertyDetail(property, imageUrls) {
     counter.hidden = true;
   }
   if (availableImages.length) showImage(0);
+
+  const video = document.querySelector("[data-detail-video]");
+  video.replaceChildren();
+  const embedUrl = getVideoEmbedUrl(property.video_url);
+  if (embedUrl) {
+    const heading = document.createElement("h2");
+    heading.textContent = "Vídeo do imóvel";
+    const frame = document.createElement("iframe");
+    frame.src = embedUrl;
+    frame.title = `Vídeo de ${property.title}`;
+    frame.loading = "lazy";
+    frame.referrerPolicy = "strict-origin-when-cross-origin";
+    frame.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+    frame.allowFullscreen = true;
+    video.append(heading, frame);
+    video.hidden = false;
+  } else {
+    video.hidden = true;
+  }
 
   document.querySelector("[data-detail-type]").textContent =
     `${typeLabels[property.property_type] || "Imóvel"} · ${purposeLabels[property.purpose] || ""}`;
@@ -299,12 +346,14 @@ async function loadPropertyDetail() {
 
   try {
     const supabase = await getPublicSupabase();
-    const { data: property, error } = await supabase
-      .from("properties")
-      .select(propertyFields)
-      .eq("id", id)
-      .eq("status", "published")
-      .maybeSingle();
+    const { data: property, error } = await selectWithOptionalVideo((fields) =>
+      supabase
+        .from("properties")
+        .select(fields)
+        .eq("id", id)
+        .eq("status", "published")
+        .maybeSingle()
+    );
     if (error) throw new Error(error.message);
     if (!property) {
       renderDetailStatus("Este anúncio não está disponível ou foi removido.");

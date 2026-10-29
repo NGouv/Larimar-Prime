@@ -145,6 +145,11 @@
             <textarea id="property-features" name="features" rows="3" aria-describedby="features-help"></textarea>
             <small id="features-help">Informe uma característica por linha.</small>
           </div>
+          <div class="admin-field admin-field-wide">
+            <label for="property-video-url">Vídeo do imóvel</label>
+            <input id="property-video-url" name="video_url" type="url" inputmode="url" placeholder="https://youtu.be/... ou https://vimeo.com/...">
+            <small>Opcional. Use um link HTTPS público do YouTube ou Vimeo. O vídeo será exibido incorporado na página do imóvel.</small>
+          </div>
           <div class="admin-field">
             <label for="property-status">Status do anúncio</label>
             <select id="property-status" name="status">
@@ -155,7 +160,7 @@
           <div class="admin-field admin-field-wide">
             <label for="property-images">Galeria de fotos</label>
             <input id="property-images" name="images" type="file" accept="image/jpeg,image/png,image/webp" multiple aria-describedby="images-help">
-            <small id="images-help">JPG, PNG ou WebP, até 10 MB por imagem. Escolha uma capa abaixo.</small>
+            <small id="images-help">JPG, PNG ou WebP, até 10 MB por imagem. Sem limite fixo de quantidade; o total depende do espaço disponível no Supabase. Escolha uma capa abaixo.</small>
             <div class="admin-image-list" data-image-list aria-label="Fotos selecionadas"></div>
           </div>
         </div>

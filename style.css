@@ -500,16 +500,16 @@ button:focus-visible {
   display: grid;
   aspect-ratio: 1;
   place-items: center;
-  background: #000;
+  background: #f2f0ea;
 }
 
 .property-card-image {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  object-position: center;
-  background: #000;
+  object-fit: cover;
+  object-position: center 38%;
+  background: #f2f0ea;
 }
 
 .property-card-body {
@@ -906,11 +906,11 @@ button:focus-visible {
   position: relative;
   display: grid;
   width: min(100%, 680px);
-  aspect-ratio: 1;
+  aspect-ratio: 4 / 3;
   margin: 0 auto;
   overflow: hidden;
   place-items: center;
-  background: #000;
+  background: #f2f0ea;
 }
 
 .detail-gallery-image {
@@ -919,7 +919,28 @@ button:focus-visible {
   height: 100%;
   object-fit: contain;
   object-position: center;
-  background: #000;
+  background: #f2f0ea;
+}
+
+.detail-video {
+  width: min(100%, 680px);
+  margin: 28px auto 0;
+}
+
+.detail-video h2 {
+  margin: 0 0 12px;
+  color: var(--navy);
+  font-family: var(--serif);
+  font-size: 30px;
+  font-weight: 500;
+}
+
+.detail-video iframe {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  background: var(--navy);
 }
 
 .detail-gallery-arrow {

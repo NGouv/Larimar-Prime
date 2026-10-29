@@ -9,6 +9,12 @@ function createSupabaseClient(auth) {
       try {
         config = await response.json();
       } catch {
+        if (response.status === 404 &&
+            ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname)) {
+          throw new Error(
+            "A rota /api/config não está disponível. O Live Server serve arquivos estáticos e não executa funções da Vercel. Use `vercel dev` com SUPABASE_URL e SUPABASE_ANON_KEY configuradas localmente."
+          );
+        }
         throw new Error(`A configuração do Supabase não respondeu corretamente (HTTP ${response.status}).`);
       }
       if (!response.ok) {
@@ -86,4 +92,47 @@ export function formatPrice(price) {
 
 export function propertyLocation(property) {
   return [property.neighborhood, property.city, property.state].filter(Boolean).join(" · ");
+}
+
+export function isMissingVideoColumn(error) {
+  return ["42703", "PGRST204"].includes(error?.code) &&
+    /video_url/i.test(error.message || "");
+}
+
+export function getVideoEmbedUrl(value) {
+  if (typeof value !== "string" || !value.trim()) return null;
+
+  let url;
+  try {
+    url = new URL(value.trim());
+  } catch {
+    return null;
+  }
+  if (url.protocol !== "https:" || url.username || url.password) return null;
+
+  const host = url.hostname.toLowerCase();
+  const segments = url.pathname.split("/").filter(Boolean);
+  if (["youtube.com", "www.youtube.com", "m.youtube.com"].includes(host)) {
+    const videoId = segments[0] === "watch"
+      ? url.searchParams.get("v")
+      : ["embed", "shorts", "live"].includes(segments[0]) ? segments[1] : null;
+    return videoId && /^[A-Za-z0-9_-]{11}$/.test(videoId)
+      ? `https://www.youtube-nocookie.com/embed/${videoId}`
+      : null;
+  }
+  if (host === "youtu.be") {
+    const videoId = segments[0];
+    return videoId && /^[A-Za-z0-9_-]{11}$/.test(videoId)
+      ? `https://www.youtube-nocookie.com/embed/${videoId}`
+      : null;
+  }
+  if (["vimeo.com", "www.vimeo.com", "player.vimeo.com"].includes(host)) {
+    const videoId = host === "player.vimeo.com" && segments[0] === "video"
+      ? segments[1]
+      : segments[0];
+    return videoId && /^\d+$/.test(videoId)
+      ? `https://player.vimeo.com/video/${videoId}`
+      : null;
+  }
+  return null;
 }

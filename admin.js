@@ -1,10 +1,10 @@
-import { createImageUrlMap, formatPrice, getSupabase, propertyLocation } from "./supabase-client.js";
+import { createImageUrlMap, formatPrice, getSupabase, getVideoEmbedUrl, isMissingVideoColumn, propertyLocation } from "./supabase-client.js";
 
 const imageBucket = "property-images";
 const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 const maxImageSize = 10 * 1024 * 1024;
-const maxGallerySize = 20;
-const propertyFields = "id,title,property_type,purpose,neighborhood,city,state,price,bedrooms,bathrooms,parking_spaces,area_sqm,description,features,gallery,cover_image_path,status,created_at";
+const propertyFields = "id,title,property_type,purpose,neighborhood,city,state,price,bedrooms,bathrooms,parking_spaces,area_sqm,description,features,gallery,cover_image_path,video_url,status,created_at";
+const propertyFieldsWithoutVideo = "id,title,property_type,purpose,neighborhood,city,state,price,bedrooms,bathrooms,parking_spaces,area_sqm,description,features,gallery,cover_image_path,status,created_at";
 
 const statusElement = document.querySelector("[data-admin-status]");
 const loginPanel = document.querySelector("[data-login-panel]");
@@ -19,6 +19,7 @@ const saveButton = document.querySelector("[data-save-property]");
 let supabase;
 let properties = [];
 let currentPropertyId = null;
+let videoColumnAvailable = true;
 let existingImages = [];
 let pendingImages = [];
 let coverKey = null;
@@ -133,12 +134,6 @@ function addSelectedImages() {
     imageInput.value = "";
     return;
   }
-  if (allImages().length + files.length > maxGallerySize) {
-    showStatus(`A galeria permite até ${maxGallerySize} fotos.`, true);
-    imageInput.value = "";
-    return;
-  }
-
   clearStatus();
   files.forEach((file) => {
     pendingImages.push({
@@ -199,6 +194,7 @@ async function openEditProperty(property) {
     propertyForm.elements.area_sqm.value = property.area_sqm ?? "";
     propertyForm.elements.description.value = property.description;
     propertyForm.elements.features.value = (property.features || []).join("\n");
+    propertyForm.elements.video_url.value = property.video_url || "";
     propertyForm.elements.status.value = property.status;
     resetImageState();
     existingImages = imageEntries
@@ -252,6 +248,7 @@ function nullableNumber(value, label) {
 
 function makePropertyPayload(id, uploadedImages, data) {
   const title = formText(data, "title", "Título do anúncio", true);
+  const videoUrl = formText(data, "video_url", "Link do vídeo");
   const selectedImages = allImages();
   const gallery = selectedImages.map((image) => {
     const path = image.path || uploadedImages.get(image.key);
@@ -297,6 +294,7 @@ function makePropertyPayload(id, uploadedImages, data) {
       .filter(Boolean),
     gallery,
     cover_image_path: coverImagePath,
+    ...(videoColumnAvailable ? { video_url: videoUrl || null } : {}),
     status
   };
 }
@@ -340,6 +338,15 @@ async function saveProperty(event) {
   if (isSaving || !propertyForm.reportValidity()) return;
 
   const formData = new FormData(propertyForm);
+  const videoUrl = String(formData.get("video_url") || "").trim();
+  if (videoUrl && !getVideoEmbedUrl(videoUrl)) {
+    showStatus("Informe um link HTTPS válido do YouTube ou Vimeo.", true);
+    return;
+  }
+  if (videoUrl && !videoColumnAvailable) {
+    showStatus("Para salvar vídeos, execute a migração do Supabase 20261029_add_property_video_url.sql primeiro.", true);
+    return;
+  }
   if (formData.get("status") === "published" &&
       (!allImages().length || !allImages().some((image) => image.key === coverKey))) {
     showStatus("Inclua ao menos uma foto e escolha a imagem de capa para publicar o anúncio.", true);
@@ -437,10 +444,18 @@ function makePropertyRow(property) {
 
 async function loadProperties() {
   showStatus("Atualizando anúncios...");
-  const { data, error } = await supabase
+  let result = await supabase
     .from("properties")
     .select(propertyFields)
     .order("created_at", { ascending: false });
+  if (result.error && isMissingVideoColumn(result.error)) {
+    videoColumnAvailable = false;
+    result = await supabase
+      .from("properties")
+      .select(propertyFieldsWithoutVideo)
+      .order("created_at", { ascending: false });
+  }
+  const { data, error } = result;
   if (error) throw new Error(`Não foi possível carregar os imóveis: ${error.message}`);
 
   properties = data || [];
@@ -460,7 +475,11 @@ async function loadProperties() {
   } else {
     list.append(...properties.map(makePropertyRow));
   }
-  clearStatus();
+  if (videoColumnAvailable) {
+    clearStatus();
+  } else {
+    showStatus("Imóveis carregados. Para habilitar vídeos, execute a migração 20261029_add_property_video_url.sql no Supabase.");
+  }
 }
 
 async function togglePublication(property) {
