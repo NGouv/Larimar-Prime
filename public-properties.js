@@ -220,8 +220,6 @@ function renderPropertyDetail(property, imageUrls) {
     image.className = "detail-gallery-image";
     image.src = imageUrls.get(firstImage.path);
     image.alt = firstImage.alt || `Foto de ${property.title}`;
-    image.width = 1200;
-    image.height = 1200;
     image.fetchPriority = "high";
     image.decoding = "async";
     gallery.append(image);
