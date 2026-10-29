@@ -905,8 +905,8 @@ button:focus-visible {
 .detail-gallery {
   position: relative;
   display: grid;
-  width: min(100%, 680px);
-  aspect-ratio: 4 / 3;
+  width: min(100%, 900px);
+  aspect-ratio: 16 / 10;
   margin: 0 auto;
   overflow: hidden;
   place-items: center;
