@@ -398,45 +398,6 @@ button:focus-visible {
   line-height: 1;
 }
 
-.carousel-controls {
-  display: grid;
-  width: 104px;
-  height: 104px;
-  flex: 0 0 auto;
-  grid-template-columns: repeat(2, 44px);
-  align-content: center;
-  justify-content: center;
-  gap: 6px;
-  border: 1px solid var(--line);
-}
-
-.carousel-arrow {
-  display: inline-flex;
-  width: 44px;
-  height: 44px;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #b9b8b2;
-  border-radius: 0;
-  background: transparent;
-  color: var(--navy);
-  cursor: pointer;
-  transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease;
-}
-
-.carousel-arrow:hover:not(:disabled) {
-  border-color: var(--navy);
-  background: var(--navy);
-  color: var(--pearl);
-}
-
-.carousel-arrow:disabled {
-  color: #9da2a6;
-  cursor: default;
-  opacity: 0.55;
-}
-
-.carousel-arrow svg,
 .back-link svg {
   width: 19px;
   height: 19px;
@@ -448,17 +409,11 @@ button:focus-visible {
 }
 
 .property-track {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  grid-auto-rows: 1fr;
   gap: clamp(16px, 2.2vw, 28px);
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding: 0 1px 14px;
-  scroll-behavior: smooth;
-  scroll-snap-type: x mandatory;
-  scrollbar-color: #b7b4ab transparent;
-  scrollbar-width: thin;
-  overscroll-behavior-x: contain;
-  -webkit-overflow-scrolling: touch;
 }
 
 .catalog-status {
@@ -483,21 +438,73 @@ button:focus-visible {
   border-color: var(--gold);
 }
 
+.catalog-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 30px;
+}
+
+.catalog-pagination[hidden] {
+  display: none;
+}
+
+.catalog-page-numbers {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.catalog-page-button {
+  display: inline-flex;
+  min-width: 40px;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #b9b8b2;
+  padding: 0 12px;
+  background: transparent;
+  color: var(--navy);
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease;
+}
+
+.catalog-page-button:hover:not(:disabled),
+.catalog-page-button[aria-current="page"] {
+  border-color: var(--navy);
+  background: var(--navy);
+  color: var(--pearl);
+}
+
+.catalog-page-button:disabled {
+  color: #9da2a6;
+  cursor: default;
+  opacity: 0.55;
+}
+
 .property-card {
   position: relative;
-  aspect-ratio: 1;
-  flex: 0 0 clamp(220px, 28vw, 350px);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
   min-width: 0;
   overflow: hidden;
   border: 1px solid var(--line);
   background: #f2f0ea;
-  scroll-snap-align: start;
+  color: inherit;
+  text-decoration: none;
 }
 
 .property-card-gallery {
-  position: absolute;
-  inset: 0;
+  position: relative;
   display: grid;
+  width: 100%;
+  flex: 0 0 auto;
   aspect-ratio: 1;
   place-items: center;
   background: #f2f0ea;
@@ -513,11 +520,6 @@ button:focus-visible {
 }
 
 .property-card-body {
-  position: absolute;
-  z-index: 1;
-  right: 0;
-  bottom: 0;
-  left: 0;
   min-width: 0;
   background: rgb(247 245 240 / 96%);
   padding: 9px 11px 5px;
@@ -525,6 +527,7 @@ button:focus-visible {
 
 .property-card-topline {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
   gap: 6px;
@@ -539,29 +542,26 @@ button:focus-visible {
 }
 
 .property-type {
-  flex: 0 0 auto;
+  flex: 0 1 auto;
   color: var(--navy);
   font-weight: 600;
 }
 
 .property-region {
-  overflow: hidden;
+  min-width: 0;
+  overflow-wrap: anywhere;
   text-align: right;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .property-title {
-  display: -webkit-box;
-  overflow: hidden;
   margin: 3px 0 0;
   color: var(--navy);
   font-family: var(--serif);
   font-size: 19px;
   font-weight: 500;
   line-height: 1.05;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  overflow-wrap: anywhere;
 }
 
 .property-card-body > .property-region {
@@ -579,13 +579,11 @@ button:focus-visible {
 
 .property-meta {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   gap: 5px;
-  overflow: hidden;
   margin: 0;
   color: var(--muted);
   font-size: 8px;
-  white-space: nowrap;
 }
 
 .card-link {
@@ -607,7 +605,7 @@ button:focus-visible {
   transition: width 160ms ease;
 }
 
-.card-link:hover::after {
+.property-card:hover .card-link::after {
   width: 34px;
 }
 
@@ -1117,6 +1115,10 @@ button:focus-visible {
 }
 
 @media (max-width: 760px) {
+  .property-track {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .site-header {
     min-height: 74px;
     padding-right: 20px;
@@ -1251,6 +1253,10 @@ button:focus-visible {
     gap: 16px;
   }
 
+  .property-track {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .section-heading h2 {
     max-width: 420px;
     font-size: clamp(35px, 9vw, 48px);
@@ -1267,14 +1273,6 @@ button:focus-visible {
 
   .partners-intro > p:last-child {
     margin-left: 0;
-  }
-
-  .carousel-controls {
-    align-self: flex-end;
-  }
-
-  .property-card {
-    flex-basis: clamp(220px, calc(100vw - 100px), 350px);
   }
 
   .santos-image-wrap img {
