@@ -944,6 +944,24 @@ button:focus-visible {
   background: var(--navy);
 }
 
+.detail-video.is-instagram {
+  width: min(100%, 540px);
+}
+
+.detail-video.is-instagram iframe {
+  height: min(720px, 185vw);
+  min-height: 480px;
+  aspect-ratio: auto;
+  background: #fff;
+}
+
+.detail-video-notice {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
 .detail-gallery-arrow {
   position: absolute;
   top: 50%;

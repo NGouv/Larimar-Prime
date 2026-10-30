@@ -99,7 +99,7 @@ export function isMissingVideoColumn(error) {
     /video_url/i.test(error.message || "");
 }
 
-export function getVideoEmbedUrl(value) {
+export function getVideoEmbedInfo(value) {
   if (typeof value !== "string" || !value.trim()) return null;
 
   let url;
@@ -112,18 +112,28 @@ export function getVideoEmbedUrl(value) {
 
   const host = url.hostname.toLowerCase();
   const segments = url.pathname.split("/").filter(Boolean);
+  if (["instagram.com", "www.instagram.com", "m.instagram.com"].includes(host) &&
+      ["p", "reel", "tv"].includes(segments[0]) &&
+      segments.length === 2 &&
+      /^[A-Za-z0-9_-]+$/.test(segments[1])) {
+    return {
+      provider: "instagram",
+      url: `https://www.instagram.com/${segments[0]}/${segments[1]}/embed/`,
+      publicUrl: url.href
+    };
+  }
   if (["youtube.com", "www.youtube.com", "m.youtube.com"].includes(host)) {
     const videoId = segments[0] === "watch"
       ? url.searchParams.get("v")
       : ["embed", "shorts", "live"].includes(segments[0]) ? segments[1] : null;
     return videoId && /^[A-Za-z0-9_-]{11}$/.test(videoId)
-      ? `https://www.youtube-nocookie.com/embed/${videoId}`
+      ? { provider: "youtube", url: `https://www.youtube-nocookie.com/embed/${videoId}` }
       : null;
   }
   if (host === "youtu.be") {
     const videoId = segments[0];
     return videoId && /^[A-Za-z0-9_-]{11}$/.test(videoId)
-      ? `https://www.youtube-nocookie.com/embed/${videoId}`
+      ? { provider: "youtube", url: `https://www.youtube-nocookie.com/embed/${videoId}` }
       : null;
   }
   if (["vimeo.com", "www.vimeo.com", "player.vimeo.com"].includes(host)) {
@@ -131,8 +141,12 @@ export function getVideoEmbedUrl(value) {
       ? segments[1]
       : segments[0];
     return videoId && /^\d+$/.test(videoId)
-      ? `https://player.vimeo.com/video/${videoId}`
+      ? { provider: "vimeo", url: `https://player.vimeo.com/video/${videoId}` }
       : null;
   }
   return null;
+}
+
+export function getVideoEmbedUrl(value) {
+  return getVideoEmbedInfo(value)?.url || null;
 }

@@ -1,4 +1,4 @@
-import { createImageUrlMap, formatPrice, getPublicSupabase, getVideoEmbedUrl, isMissingVideoColumn, propertyLocation } from "./supabase-client.js";
+import { createImageUrlMap, formatPrice, getPublicSupabase, getVideoEmbedInfo, isMissingVideoColumn, propertyLocation } from "./supabase-client.js";
 
 const propertyFields = "id,title,property_type,purpose,neighborhood,city,state,price,bedrooms,bathrooms,parking_spaces,area_sqm,description,features,gallery,cover_image_path,video_url,status,published_at,created_at";
 const propertyFieldsWithoutVideo = "id,title,property_type,purpose,neighborhood,city,state,price,bedrooms,bathrooms,parking_spaces,area_sqm,description,features,gallery,cover_image_path,status,published_at,created_at";
@@ -329,18 +329,40 @@ function renderPropertyDetail(property, imageUrls) {
 
   const video = document.querySelector("[data-detail-video]");
   video.replaceChildren();
-  const embedUrl = getVideoEmbedUrl(property.video_url);
-  if (embedUrl) {
+  video.classList.remove("is-instagram");
+  const embedInfo = getVideoEmbedInfo(property.video_url);
+  if (embedInfo) {
     const heading = document.createElement("h2");
     heading.textContent = "Vídeo do imóvel";
     const frame = document.createElement("iframe");
-    frame.src = embedUrl;
+    frame.src = embedInfo.url;
     frame.title = `Vídeo de ${property.title}`;
     frame.loading = "lazy";
     frame.referrerPolicy = "strict-origin-when-cross-origin";
     frame.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
     frame.allowFullscreen = true;
     video.append(heading, frame);
+    if (embedInfo.provider === "instagram") {
+      video.classList.add("is-instagram");
+      const notice = document.createElement("p");
+      notice.className = "detail-video-notice";
+      notice.textContent = "A incorporação depende de a publicação estar pública e permitir exibição fora do Instagram. Se ela não carregar, ";
+      const link = document.createElement("a");
+      link.href = embedInfo.publicUrl;
+      link.target = "_blank";
+      link.rel = "noopener";
+      link.textContent = "abra a publicação no Instagram";
+      notice.append(link, ".");
+      video.append(notice);
+    }
+    video.hidden = false;
+  } else if (property.video_url) {
+    const heading = document.createElement("h2");
+    heading.textContent = "Vídeo do imóvel";
+    const notice = document.createElement("p");
+    notice.className = "detail-video-notice";
+    notice.textContent = "O link de vídeo salvo é inválido ou incompatível. Atualize-o no painel administrativo.";
+    video.append(heading, notice);
     video.hidden = false;
   } else {
     video.hidden = true;

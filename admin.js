@@ -1,4 +1,4 @@
-import { createImageUrlMap, formatPrice, getSupabase, getVideoEmbedUrl, isMissingVideoColumn, propertyLocation } from "./supabase-client.js";
+import { createImageUrlMap, formatPrice, getSupabase, getVideoEmbedInfo, isMissingVideoColumn, propertyLocation } from "./supabase-client.js";
 
 const imageBucket = "property-images";
 const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -339,8 +339,8 @@ async function saveProperty(event) {
 
   const formData = new FormData(propertyForm);
   const videoUrl = String(formData.get("video_url") || "").trim();
-  if (videoUrl && !getVideoEmbedUrl(videoUrl)) {
-    showStatus("Informe um link HTTPS válido do YouTube ou Vimeo.", true);
+  if (videoUrl && !getVideoEmbedInfo(videoUrl)) {
+    showStatus("Link inválido ou incompatível. Use um link HTTPS público de vídeo/Reel do Instagram, YouTube ou Vimeo.", true);
     return;
   }
   if (videoUrl && !videoColumnAvailable) {

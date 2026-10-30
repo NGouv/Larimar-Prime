@@ -52,13 +52,13 @@ Enquanto `video_url` ainda não existir no banco, o catálogo e o painel mantêm
 ## Operação do painel
 
 1. Abra `/admin` e entre com a conta que foi autorizada em `admin_users`.
-2. Use **Novo imóvel**, preencha os campos obrigatórios e adicione fotos JPG, PNG ou WebP de até 10 MB. Não há limite fixo de quantidade no formulário; a capacidade total depende do espaço disponível no projeto Supabase. Escolha uma imagem de capa. Opcionalmente, informe um link HTTPS público do YouTube ou Vimeo.
+2. Use **Novo imóvel**, preencha os campos obrigatórios e adicione fotos JPG, PNG ou WebP de até 10 MB. Não há limite fixo de quantidade no formulário; a capacidade total depende do espaço disponível no projeto Supabase. Escolha uma imagem de capa. Opcionalmente, informe um link HTTPS público de vídeo/Reel do Instagram, YouTube ou Vimeo.
 3. Salve como rascunho ou publicado. A publicação requer uma capa e ao menos uma foto.
 4. Use **Editar** para atualizar os dados e manter as fotos existentes. A galeria permite definir a capa, remover e reordenar fotos. Remover fotos do formulário só apaga os objetos do Storage depois que a atualização do anúncio for salva.
 5. Use **Publicar/Despublicar** para alterar a visibilidade. **Excluir** pede confirmação e remove o anúncio antes de tentar limpar suas imagens.
 6. **Recuperar senha** envia o fluxo padrão do Supabase Auth para o e-mail informado. O envio depende do provedor de e-mail e das URLs permitidas no projeto.
 
-O catálogo público lista apenas anúncios publicados. As fotos ficam em bucket privado e são exibidas por URLs assinadas; políticas permitem leitura somente de fotos pertencentes a imóveis publicados ou a um administrador autenticado. Detalhes de anúncios em rascunho não são retornados ao público. Vídeos são incorporados a partir de links públicos do YouTube ou Vimeo; o projeto não faz upload nem armazena arquivos de vídeo.
+O catálogo público lista apenas anúncios publicados. As fotos ficam em bucket privado e são exibidas por URLs assinadas; políticas permitem leitura somente de fotos pertencentes a imóveis publicados ou a um administrador autenticado. Detalhes de anúncios em rascunho não são retornados ao público. Vídeos são incorporados a partir dos links salvos em `video_url`; o projeto não faz upload nem armazena arquivos de vídeo. Para o Instagram, somente links de publicações, vídeos e Reels são aceitos. A incorporação depende de a publicação estar pública e permitir exibição em sites externos; publicações privadas, removidas ou com incorporação desativada podem não carregar. Nesses casos, a página oferece o link para abrir a publicação no Instagram. O suporte não requer alteração no banco além da coluna `video_url` já prevista na migração existente.
 
 ## Verificação e limites conhecidos
 
