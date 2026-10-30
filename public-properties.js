@@ -2,6 +2,7 @@ import { createImageUrlMap, formatPrice, getPublicSupabase, getVideoEmbedUrl, is
 
 const propertyFields = "id,title,property_type,purpose,neighborhood,city,state,price,bedrooms,bathrooms,parking_spaces,area_sqm,description,features,gallery,cover_image_path,video_url,status,published_at,created_at";
 const propertyFieldsWithoutVideo = "id,title,property_type,purpose,neighborhood,city,state,price,bedrooms,bathrooms,parking_spaces,area_sqm,description,features,gallery,cover_image_path,status,published_at,created_at";
+const catalogPageSize = 9;
 const typeLabels = {
   casa: "Casa",
   apartamento: "Apartamento",
@@ -16,6 +17,9 @@ const purposeLabels = {
   venda_locacao: "Venda e locação"
 };
 let videoColumnAvailable = true;
+let catalogCurrentPage = 1;
+let catalogPageCount = 0;
+let catalogRequestId = 0;
 
 async function selectWithOptionalVideo(query) {
   let result = await query(propertyFields);
@@ -39,9 +43,11 @@ function setCatalogStatus(message, retry) {
   const track = document.querySelector("[data-property-track]");
   if (!track) return;
 
+  track.setAttribute("aria-busy", "false");
   track.replaceChildren();
-  document.querySelector("[data-carousel-prev]").disabled = true;
-  document.querySelector("[data-carousel-next]").disabled = true;
+  document.querySelector("[data-catalog-pagination]").hidden = true;
+  document.querySelector("[data-page-previous]").disabled = true;
+  document.querySelector("[data-page-next]").disabled = true;
   const status = document.createElement("p");
   status.className = "catalog-status";
   status.setAttribute("role", "status");
@@ -60,8 +66,9 @@ function setCatalogStatus(message, retry) {
 }
 
 function createPropertyCard(property, imageUrls) {
-  const card = document.createElement("article");
+  const card = document.createElement("a");
   card.className = "property-card";
+  card.href = `/imovel?id=${encodeURIComponent(property.id)}`;
 
   const gallery = orderedGallery(property);
   const cover = gallery[0];
@@ -116,61 +123,99 @@ function createPropertyCard(property, imageUrls) {
     meta.append(item);
   });
 
-  const link = document.createElement("a");
+  const link = document.createElement("span");
   link.className = "card-link";
-  link.href = `/imovel?id=${encodeURIComponent(property.id)}`;
   link.textContent = "Ver detalhes";
   body.append(topline, title, purpose, price, meta, link);
   card.append(body);
   return card;
 }
 
-function setupCarousel(track) {
-  const previous = document.querySelector("[data-carousel-prev]");
-  const next = document.querySelector("[data-carousel-next]");
-  if (!previous || !next) return;
+function updateCatalogPagination() {
+  const pagination = document.querySelector("[data-catalog-pagination]");
+  const previous = document.querySelector("[data-page-previous]");
+  const next = document.querySelector("[data-page-next]");
+  const pageNumbers = document.querySelector("[data-page-numbers]");
 
-  const updateButtons = () => {
-    const maxScroll = track.scrollWidth - track.clientWidth;
-    previous.disabled = track.scrollLeft <= 2;
-    next.disabled = maxScroll <= 2 || track.scrollLeft >= maxScroll - 2;
-  };
-  const scrollByCard = (direction) => {
-    const card = track.querySelector(".property-card");
-    if (!card) return;
-    const gap = Number.parseFloat(getComputedStyle(track).columnGap) || 0;
-    track.scrollBy({
-      left: direction * (card.getBoundingClientRect().width + gap),
-      behavior: "smooth"
-    });
-  };
+  pagination.hidden = catalogPageCount === 0;
+  previous.disabled = catalogCurrentPage <= 1;
+  next.disabled = catalogCurrentPage >= catalogPageCount;
+  pageNumbers.replaceChildren();
 
-  previous.addEventListener("click", () => scrollByCard(-1));
-  next.addEventListener("click", () => scrollByCard(1));
-  track.addEventListener("scroll", updateButtons, { passive: true });
-  window.addEventListener("resize", updateButtons);
-  updateButtons();
+  for (let page = 1; page <= catalogPageCount; page += 1) {
+    const button = document.createElement("button");
+    button.className = "catalog-page-button";
+    button.type = "button";
+    button.textContent = String(page);
+    button.setAttribute("aria-label", `Ir para a página ${page}`);
+    if (page === catalogCurrentPage) {
+      button.setAttribute("aria-current", "page");
+    }
+    button.addEventListener("click", () => loadCatalogPage(page));
+    pageNumbers.append(button);
+  }
 }
 
-async function loadCatalog() {
+function setupCatalogPagination() {
+  if (!document.querySelector("[data-catalog-pagination]")) return;
+
+  document.querySelector("[data-page-previous]").addEventListener("click", () => {
+    loadCatalogPage(catalogCurrentPage - 1);
+  });
+  document.querySelector("[data-page-next]").addEventListener("click", () => {
+    loadCatalogPage(catalogCurrentPage + 1);
+  });
+}
+
+async function loadCatalogPage(page) {
   const track = document.querySelector("[data-property-track]");
   if (!track) return;
 
-  setCatalogStatus("Carregando imóveis...", false);
+  const requestId = ++catalogRequestId;
+  track.setAttribute("aria-busy", "true");
+  document.querySelector("[data-page-previous]").disabled = true;
+  document.querySelector("[data-page-next]").disabled = true;
+  document.querySelectorAll("[data-page-numbers] button").forEach((button) => {
+    button.disabled = true;
+  });
+
   try {
     const supabase = await getPublicSupabase();
-    const { data: properties, error } = await selectWithOptionalVideo((fields) =>
+    const { data: properties, count, error } = await selectWithOptionalVideo((fields) =>
       supabase
         .from("properties")
-        .select(fields)
+        .select(fields, { count: "exact" })
         .eq("status", "published")
         .order("published_at", { ascending: false, nullsFirst: false })
         .order("created_at", { ascending: false })
+        .range((page - 1) * catalogPageSize, page * catalogPageSize - 1)
     );
     if (error) throw new Error(error.message);
 
+    if (requestId !== catalogRequestId) return;
+
+    catalogPageCount = Math.ceil((count || 0) / catalogPageSize);
     if (!properties?.length) {
-      setCatalogStatus("Estamos preparando nossos imóveis para você.", false);
+      if (catalogPageCount && page > catalogPageCount) {
+        await loadCatalogPage(catalogPageCount);
+        return;
+      }
+
+      catalogCurrentPage = 1;
+      catalogPageCount = 0;
+      track.setAttribute("aria-busy", "false");
+      track.replaceChildren();
+      const status = document.createElement("p");
+      status.className = "catalog-status";
+      status.setAttribute("role", "status");
+      status.textContent = "Estamos preparando nossos imóveis para você.";
+      track.append(status);
+      updateCatalogPagination();
+      return;
+    }
+
+    if (page > catalogPageCount) {
+      await loadCatalogPage(catalogPageCount);
       return;
     }
 
@@ -181,11 +226,22 @@ async function loadCatalog() {
     if (imageUrls.size !== new Set(paths).size) {
       throw new Error("Uma ou mais fotos dos imóveis não estão disponíveis.");
     }
+    if (requestId !== catalogRequestId) return;
+
+    catalogCurrentPage = page;
     track.replaceChildren(...properties.map((property) => createPropertyCard(property, imageUrls)));
-    setupCarousel(track);
+    track.setAttribute("aria-busy", "false");
+    updateCatalogPagination();
   } catch (error) {
-    setCatalogStatus(`Não foi possível carregar os imóveis. ${error.message}`, true);
+    if (requestId === catalogRequestId) {
+      setCatalogStatus(`Não foi possível carregar os imóveis. ${error.message}`, true);
+    }
   }
+}
+
+function loadCatalog() {
+  document.querySelector("[data-property-track]")?.setAttribute("aria-busy", "true");
+  loadCatalogPage(catalogCurrentPage || 1);
 }
 
 function renderDetailStatus(message, retry) {
@@ -369,5 +425,6 @@ async function loadPropertyDetail() {
   }
 }
 
+setupCatalogPagination();
 loadCatalog();
 loadPropertyDetail();

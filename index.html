@@ -96,18 +96,15 @@
           <p class="eyebrow eyebrow-dark">Uma seleção para inspirar</p>
           <h2 id="catalog-title">Espaços para novos começos</h2>
         </div>
-        <div class="carousel-controls" aria-label="Controles dos imóveis">
-          <button class="carousel-arrow" type="button" data-carousel-prev aria-label="Ver imóveis anteriores" disabled>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m7 7-7-7 7-7"></path></svg>
-          </button>
-          <button class="carousel-arrow" type="button" data-carousel-next aria-label="Ver próximos imóveis">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-7-7 7 7-7 7"></path></svg>
-          </button>
-        </div>
       </div>
-      <div class="property-track" data-property-track aria-label="Imóveis publicados">
+      <div class="property-track" data-property-track aria-label="Imóveis publicados" aria-live="polite">
         <p class="catalog-status" data-catalog-status role="status" aria-live="polite">Carregando imóveis...</p>
       </div>
+      <nav class="catalog-pagination" data-catalog-pagination aria-label="Paginação dos imóveis" hidden>
+        <button class="catalog-page-button" type="button" data-page-previous>Anterior</button>
+        <div class="catalog-page-numbers" data-page-numbers></div>
+        <button class="catalog-page-button" type="button" data-page-next>Próxima</button>
+      </nav>
     </section>
 
     <section class="santos-section" id="santos" aria-labelledby="santos-title">
